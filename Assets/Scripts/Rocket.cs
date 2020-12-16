@@ -48,8 +48,7 @@ public class Rocket : MonoBehaviour
     private void Rotate()
     {
         // ROTATION
-        rb.freezeRotation = true;
-
+         rb.freezeRotation = true;
 
         if (Input.GetKey(KeyCode.A))
         {
@@ -60,5 +59,26 @@ public class Rocket : MonoBehaviour
         {
             transform.Rotate(-Vector3.forward * rotationSpeed * Time.deltaTime);
         }
-    }    
+
+        rb.freezeRotation = false;
+    }
+
+
+    void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                print("Friendly collision");
+                break;
+
+            case "Fuel":
+                print("Fuel collision");
+                break;
+
+            default:
+                print("Non-friendly collision");
+                break;
+        }
+    }
 }
