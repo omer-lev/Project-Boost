@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class Rocket : MonoBehaviour
@@ -11,6 +9,9 @@ public class Rocket : MonoBehaviour
 
     Rigidbody rb;
     AudioSource boostSound;
+
+    enum State { Alive, Dying, Transcening };
+    State state = State.Alive;
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +31,7 @@ public class Rocket : MonoBehaviour
     private void Boost()
     {
         // BOOST
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && state == State.Alive)
         {
             rb.AddRelativeForce(Vector3.up * boostSpeed * Time.deltaTime);
             if (!boostSound.isPlaying)
@@ -50,14 +51,17 @@ public class Rocket : MonoBehaviour
         // ROTATION
          rb.freezeRotation = true;
 
-        if (Input.GetKey(KeyCode.A))
+        if (state == State.Alive)
         {
-            transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
-        }
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
+            }
 
-        else if (Input.GetKey(KeyCode.D))
-        {
-            transform.Rotate(-Vector3.forward * rotationSpeed * Time.deltaTime);
+            else if (Input.GetKey(KeyCode.D))
+            {
+                transform.Rotate(-Vector3.forward * rotationSpeed * Time.deltaTime);
+            }
         }
 
         rb.freezeRotation = false;
@@ -69,16 +73,32 @@ public class Rocket : MonoBehaviour
         switch (collision.gameObject.tag)
         {
             case "Friendly":
-                print("Friendly collision");
+
                 break;
 
             case "Fuel":
-                print("Fuel collision");
+
+                break;
+
+            case "Finish":
+                state = State.Transcening;
+                Invoke("LoadNextScene", 1f);
                 break;
 
             default:
-                print("Non-friendly collision");
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f);
                 break;
         }
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    private void LoadNextScene()
+    {
+        SceneManager.LoadScene(1);
     }
 }
